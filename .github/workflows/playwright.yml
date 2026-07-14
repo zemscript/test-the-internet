@@ -27,7 +27,7 @@ jobs:
       - name: Run Playwright tests
         run: npm run tests
         env:
-          BASE_URL: https://the-internet.herokuapp.com/
+          BASE_URL: https://the-internet.herokuapp.com
           STANDARD_USER: standard_user
           SECRET_PASSWORD: secret_sauce
       # 6
