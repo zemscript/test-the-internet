@@ -14,7 +14,7 @@ class Page0 {
   }
 
   async click(text: string) {
-    await this.page.getByRole("link", { name: new RegExp(text) }).click();
+    await this.page.getByRole("link", { name: text, exact: true }).click();
   }
 }
 
