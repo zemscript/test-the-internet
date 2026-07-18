@@ -1,15 +1,15 @@
-import Page0 from "@/pages/0-base";
+import { App } from "@/pages/app";
 import { test as base } from "@playwright/test";
 export { expect } from "@playwright/test";
 
 interface FixturesProps {
-  basePage: Page0;
+  app: App;
 }
 
 export const test = base.extend<FixturesProps>({
-  basePage: async ({ page }, use) => {
-    const basePage = new Page0(page);
-    await use(basePage);
+  app: async ({ page }, use) => {
+    const app = new App(page);
+    await use(app);
   },
 
   page: async ({ page }, use) => {
