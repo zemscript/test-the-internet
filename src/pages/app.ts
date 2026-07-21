@@ -23,6 +23,10 @@ import {
   Page20,
   Page21,
   Page22,
+  Page23,
+  Page24,
+  Page25,
+  Page26,
 } from "@/pages/pages";
 
 export class App {
@@ -96,5 +100,17 @@ export class App {
   }
   get page22() {
     return new Page22(this.page);
+  }
+  get page23() {
+    return new Page23(this.page);
+  }
+  get page24() {
+    return new Page24(this.page);
+  }
+  get page25() {
+    return new Page25(this.page);
+  }
+  get page26() {
+    return new Page26(this.page);
   }
 }

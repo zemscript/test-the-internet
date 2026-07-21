@@ -559,3 +559,84 @@ test.describe("22. Geolocation", () => {
     await expect(app.page22.longitudeText).toHaveText(/2\.3522/);
   });
 });
+
+test.describe("23. Horizontal Slider", () => {
+  test("23.1 Взаимодействие с горизонтальным слайдером", async ({ app }) => {
+    const testingPage = app.page23;
+
+    await app.page0.navigate();
+    await app.page0.click("Horizontal Slider");
+
+    await expect(testingPage.input).toBeVisible();
+    await expect(testingPage.num).toHaveText("0");
+    await testingPage.moveInput(3);
+    await expect(testingPage.num).toHaveText("1.5");
+  });
+});
+
+test.describe("24. Hovers", () => {
+  test.beforeEach(async ({ app }) => {
+    await app.page0.navigate();
+    await app.page0.click("Hovers");
+    await expect(app.page24.card).toHaveCount(3);
+  });
+
+  const itemsTests = [
+    { index: 0, text: "name: user1" },
+    { index: 1, text: "name: user2" },
+    { index: 2, text: "name: user3" },
+  ];
+
+  test("24.1 Проверка работы hover", async ({ app, page }) => {
+    const testingPage = app.page24;
+
+    await testingPage.cardHover(0);
+    await expect(testingPage.cardText(0)).toHaveText(/name: user1/);
+    await testingPage.cardLink(0);
+    await expect(page).toHaveURL(`${ENV_BASE_URL}/users/1`);
+  });
+
+  test("24.2 Проверка текста под каждой карточкой", async ({ app }) => {
+    for (const item of itemsTests) {
+      const testingPage = app.page24;
+      await testingPage.cardHover(item.index);
+      await expect(testingPage.cardText(item.index)).toHaveText(item.text);
+    }
+  });
+});
+
+test.describe("25. Infinite Scroll", () => {
+  test("25.1 Корректная работа бесконечного scroll", async ({ app, page }) => {
+    const testingPage = app.page25;
+    let count = 0;
+
+    await app.page0.navigate();
+    await app.page0.click("Infinite Scroll");
+
+    await expect(testingPage.paragraph.first()).toBeVisible();
+    count = await testingPage.paragraph.count();
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForTimeout(3000);
+    await expect(testingPage.paragraph).toHaveCount(count + 1);
+  });
+});
+
+test.describe("26. Inputs", () => {
+  test("26.1 Взаимодействие с числовым полем ввода", async ({ app }) => {
+    const testingPage = app.page26;
+    await app.page0.navigate();
+    await app.page0.click("Inputs");
+
+    await expect(testingPage.input).toBeVisible();
+    await testingPage.input.fill("12345");
+    await expect(testingPage.input).toHaveValue("12345");
+    await testingPage.input.focus();
+    await testingPage.moveInput("ArrowUp", 3);
+    await expect(testingPage.input).toHaveValue("12348");
+    await testingPage.moveInput("ArrowDown", 5);
+    await expect(testingPage.input).toHaveValue("12343");
+    await testingPage.input.clear();
+    await testingPage.input.pressSequentially("abcABC");
+    await expect(testingPage.input).toHaveValue("");
+  });
+});

@@ -2,6 +2,7 @@ import { FrameLocator, Locator, Page, Response } from "@playwright/test";
 import path from "path";
 
 type FramePosition = "LEFT" | "MIDDLE" | "RIGHT" | "BOTTOM";
+type InputDirection = "ArrowUp" | "ArrowDown";
 
 export class Page0 {
   readonly page: Page;
@@ -469,5 +470,81 @@ export class Page22 {
 
   async clickButton() {
     await this.button.click();
+  }
+}
+
+export class Page23 {
+  readonly page: Page;
+  readonly input: Locator;
+  readonly num: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.input = page.locator('input[type="range"]');
+    this.num = page.locator("#range");
+  }
+
+  // async moveRight() {
+  //   await this.input.press("ArrowRight");
+  // }
+
+  async moveInput(step: number) {
+    await this.input.focus();
+    for (let i = 0; i < step; i++) {
+      await this.input.press("ArrowRight");
+    }
+  }
+}
+
+export class Page24 {
+  readonly page: Page;
+  readonly card: Locator;
+  readonly text: Locator;
+  readonly link: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.card = page.locator("div.figure");
+    this.text = page.locator(".figcaption h5");
+    this.link = page.getByRole("link", { name: "View profile" });
+  }
+
+  async cardHover(index: number) {
+    await this.card.nth(index).hover();
+  }
+
+  cardText(index: number) {
+    return this.text.nth(index);
+  }
+
+  async cardLink(index: number) {
+    return this.link.nth(index).click();
+  }
+}
+
+export class Page25 {
+  readonly page: Page;
+  readonly paragraph: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.paragraph = page.locator("div.jscroll-added");
+  }
+}
+
+export class Page26 {
+  readonly page: Page;
+  readonly input: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.input = page.locator('input[type="number"]');
+  }
+
+  async moveInput(direction: InputDirection, step: number) {
+    await this.input.focus();
+    for (let i = 0; i < step; i++) {
+      await this.input.press(direction);
+    }
   }
 }
