@@ -3,6 +3,7 @@ import path from "path";
 
 type FramePosition = "LEFT" | "MIDDLE" | "RIGHT" | "BOTTOM";
 type InputDirection = "ArrowUp" | "ArrowDown";
+type ConfirmOptions = "accept" | "dismiss";
 
 export class Page0 {
   readonly page: Page;
@@ -546,5 +547,105 @@ export class Page26 {
     for (let i = 0; i < step; i++) {
       await this.input.press(direction);
     }
+  }
+}
+
+export class Page27 {
+  readonly page: Page;
+  readonly enabledItem: Locator;
+  readonly downloadsItem: Locator;
+  readonly pdfItem: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.enabledItem = page.getByRole("menuitem", { name: "Enabled" });
+    this.downloadsItem = page.getByRole("menuitem", { name: "Downloads" });
+    this.pdfItem = page.getByRole("menuitem", { name: "PDF" });
+  }
+
+  async hoverEnabled() {
+    await this.enabledItem.hover();
+  }
+
+  async hoverDownloads() {
+    await this.downloadsItem.hover();
+  }
+}
+
+export class Page28 {
+  readonly page: Page;
+  readonly buttonAlert: Locator;
+  readonly buttonConfirm: Locator;
+  readonly buttonPrompt: Locator;
+  readonly text: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.buttonAlert = page.getByRole("button", { name: "Click for JS Alert" });
+    this.buttonConfirm = page.getByRole("button", {
+      name: "Click for JS Confirm",
+    });
+    this.buttonPrompt = page.getByRole("button", {
+      name: "Click for JS Prompt",
+    });
+    this.text = page.locator("#result");
+  }
+
+  async alertClick() {
+    let alertText = "";
+    this.page.once("dialog", async (dialog) => {
+      alertText = dialog.message();
+      await dialog.accept();
+    });
+    await this.buttonAlert.click();
+    return alertText;
+  }
+
+  async confirmClick(action: ConfirmOptions) {
+    let alertText = "";
+    this.page.once("dialog", async (dialog) => {
+      alertText = dialog.message();
+      if (action === "accept") {
+        await dialog.accept();
+      } else {
+        await dialog.dismiss();
+      }
+    });
+    await this.buttonConfirm.click();
+    return alertText;
+  }
+
+  async promptClick(action: ConfirmOptions, text?: string) {
+    let alertText = "";
+    this.page.once("dialog", async (dialog) => {
+      alertText = dialog.message();
+      if (action === "accept") {
+        await dialog.accept(text);
+      } else {
+        await dialog.dismiss();
+      }
+    });
+    await this.buttonPrompt.click();
+    return alertText;
+  }
+}
+
+export class Page29 {
+  readonly page: Page;
+  readonly text: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.text = page.locator("p");
+  }
+}
+
+export class Page30 {
+  readonly page: Page;
+  readonly text: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.text = page.locator("#result");
   }
 }

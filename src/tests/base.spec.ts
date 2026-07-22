@@ -640,3 +640,105 @@ test.describe("26. Inputs", () => {
     await expect(testingPage.input).toHaveValue("");
   });
 });
+
+test.describe("27. JQuery UI Menus", () => {
+  test("27.1 Взаимодействие с JQuery UI Menus", async ({ app, page }) => {
+    const testingPage = app.page27;
+    const fileName = "menu.pdf";
+    const savePath = join(process.cwd(), "src", "download", fileName);
+
+    await app.page0.navigate();
+    await app.page0.click("JQuery UI Menus");
+
+    await expect(testingPage.enabledItem).toBeVisible();
+    await testingPage.hoverEnabled();
+    await expect(testingPage.downloadsItem).toBeVisible();
+    await testingPage.hoverDownloads();
+    await expect(testingPage.pdfItem).toBeVisible();
+    const downloadPromise = page.waitForEvent("download");
+    await testingPage.pdfItem.click();
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toBe(fileName);
+    await download.saveAs(savePath);
+    const fileExists = existsSync(savePath);
+    expect(fileExists).toBe(true);
+    const fileStats = statSync(savePath);
+    expect(fileStats.size).toBeGreaterThan(0);
+  });
+});
+
+test.describe("28 JavaScript Alerts", async () => {
+  test.beforeEach(async ({ app }) => {
+    await app.page0.navigate();
+    await app.page0.click("JavaScript Alerts");
+  });
+
+  test("28.1 Проверка JS Alert", async ({ app }) => {
+    const testingPage = app.page28;
+
+    const message = await testingPage.alertClick();
+    expect(message).toBe("I am a JS Alert");
+    await expect(testingPage.text).toHaveText(
+      `You successfully clicked an alert`,
+    );
+  });
+
+  test("28.2 Проверка JS Confirm", async ({ app }) => {
+    const testingPage = app.page28;
+
+    const message = await testingPage.confirmClick("dismiss");
+    expect(message).toBe("I am a JS Confirm");
+    await expect(testingPage.text).toHaveText(`You clicked: Cancel`);
+
+    await testingPage.confirmClick("accept");
+    await expect(testingPage.text).toHaveText(`You clicked: Ok`);
+  });
+
+  test("28.3 Проверка JS Prompt", async ({ app }) => {
+    const testingPage = app.page28;
+    const enterText = "123qwe";
+
+    const message = await testingPage.promptClick("accept", enterText);
+    expect(message).toBe("I am a JS prompt");
+    await expect(testingPage.text).toHaveText(`You entered: ${enterText}`);
+
+    await testingPage.promptClick("dismiss");
+    await expect(testingPage.text).toHaveText(`You entered: null`);
+  });
+});
+
+test.describe("29. JavaScript onload event error", () => {
+  test("29.1 Перехват ошибки", async ({ app, page }) => {
+    const testingPage = app.page29;
+    const errors: Error[] = [];
+    page.on("pageerror", (item) => {
+      errors.push(item);
+    });
+
+    await app.page0.navigate();
+    await app.page0.click("JavaScript onload event error");
+
+    expect(errors).toHaveLength(1);
+    expect(errors[0].message).toContain("Cannot read propert");
+    expect(errors[0].message).toContain("xyz");
+    await expect(testingPage.text).toHaveText(
+      `This page has a JavaScript error in the onload event. This is often a problem to using normal Javascript injection techniques.`,
+    );
+  });
+});
+
+test.describe("30. Key Presses", () => {
+  test("30.1 Нажатие различных клавиш", async ({ app, page }) => {
+    const testingPage = app.page30;
+    const key = "Alt";
+
+    await app.page0.navigate();
+    await app.page0.click("Key Presses");
+
+    await expect(testingPage.text).not.toBeVisible();
+    await page.keyboard.press(key);
+    await expect(testingPage.text).toHaveText(
+      `You entered: ${key.toUpperCase()}`,
+    );
+  });
+});
