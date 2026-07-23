@@ -649,3 +649,106 @@ export class Page30 {
     this.text = page.locator("#result");
   }
 }
+
+export class Page31 {
+  readonly page: Page;
+  readonly sibling: Locator;
+  readonly noSibling: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.sibling = page.locator("#sibling-1\\.1");
+    this.noSibling = page.locator("#no-siblings");
+  }
+
+  getCell(row: number, column: number) {
+    return this.page.locator(`#large-table .row-${row} .column-${column}`);
+  }
+}
+
+export class Page32 {
+  readonly page: Page;
+  readonly link: Locator;
+  readonly text: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.link = page.getByRole("link", { name: "Click Here" });
+    this.text = page.locator("h3");
+  }
+
+  textLocator(currentPage: Page) {
+    return (currentPage || this.page).locator("h3");
+  }
+}
+
+export class Page33 {
+  readonly page: Page;
+
+  constructor(page: Page) {
+    this.page = page;
+  }
+
+  getFrameMap(name: FramePosition) {
+    const topFrame = this.page.frameLocator('frame[name="frame-top"]');
+    const frameMap: Record<string, FrameLocator> = {
+      LEFT: topFrame.frameLocator('frame[name="frame-left"]'),
+      MIDDLE: topFrame.frameLocator('frame[name="frame-middle"]'),
+      RIGHT: topFrame.frameLocator('frame[name="frame-right"]'),
+      BOTTOM: this.page.frameLocator('frame[name="frame-bottom"]'),
+    };
+    return frameMap[name];
+  }
+
+  getCurrentFrame(name: FramePosition) {
+    return this.getFrameMap(name).locator("body");
+  }
+}
+
+export class Page34 {
+  readonly page: Page;
+  readonly flash: Locator;
+  readonly link: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.flash = page.locator("#flash");
+    this.link = page.getByRole("link", { name: "Click here" });
+  }
+}
+
+export class Page35 {
+  readonly page: Page;
+  readonly link: Locator;
+  readonly code: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.link = page.getByRole("link", { name: "here" });
+    this.code = page.locator("li a ");
+  }
+
+  async clickCode(text: number) {
+    await this.code.nth(text).click();
+  }
+}
+
+export class Page36 {
+  readonly page: Page;
+  readonly title: Locator;
+  readonly file: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.title = page.locator("h3");
+    this.file = page.locator(".example a");
+  }
+
+  fileHref(name: string): Locator {
+    return this.file.getByText(name, { exact: true });
+  }
+
+  async clickFile(name: string) {
+    await this.fileHref(name).click();
+  }
+}

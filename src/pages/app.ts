@@ -31,6 +31,12 @@ import {
   Page28,
   Page29,
   Page30,
+  Page31,
+  Page32,
+  Page33,
+  Page34,
+  Page35,
+  Page36,
 } from "@/pages/pages";
 
 export class App {
@@ -128,5 +134,23 @@ export class App {
   }
   get page30() {
     return new Page30(this.page);
+  }
+  get page31() {
+    return new Page31(this.page);
+  }
+  get page32() {
+    return new Page32(this.page);
+  }
+  get page33() {
+    return new Page33(this.page);
+  }
+  get page34() {
+    return new Page34(this.page);
+  }
+  get page35() {
+    return new Page35(this.page);
+  }
+  get page36() {
+    return new Page36(this.page);
   }
 }

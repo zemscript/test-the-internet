@@ -400,7 +400,7 @@ test.describe("16. File Download", async () => {
     await app.page0.navigate();
     await app.page0.click("File Download");
 
-    const fileName = "test_upload.txt";
+    const fileName = "hello.txt";
     const savePath = join(process.cwd(), "src", "download", fileName);
 
     await expect(app.page16.fileHref(fileName)).toBeVisible();
@@ -423,7 +423,7 @@ test.describe("17. File Upload", async () => {
 
     await expect(app.page17.input).toBeVisible();
     await app.page17.loadFile();
-    await expect(app.page17.text).toHaveText("test_upload.txt");
+    await expect(app.page17.text).toHaveText("hello.txt");
   });
 });
 
@@ -740,5 +740,173 @@ test.describe("30. Key Presses", () => {
     await expect(testingPage.text).toHaveText(
       `You entered: ${key.toUpperCase()}`,
     );
+  });
+});
+
+test.describe("31. Large & Deep DOM", () => {
+  test.beforeEach(async ({ app }) => {
+    await app.page0.navigate();
+    await app.page0.click("Large & Deep DOM");
+  });
+
+  test("31.1 Проверка работы с большим и глубоким DOM", async ({ app }) => {
+    const testingPage = app.page31;
+
+    await expect(testingPage.sibling).toHaveText(/1.1/);
+    await expect(testingPage.noSibling).toHaveText("No siblings");
+  });
+
+  test("31.2 Поиск данных в большой таблице", async ({ app }) => {
+    const testingPage = app.page31;
+    const row = 19;
+    const col = 12;
+
+    const cell = testingPage.getCell(row, col);
+    await cell.scrollIntoViewIfNeeded();
+    await expect(cell).toBeVisible();
+    await expect(cell).toHaveText(`${row}.${col}`);
+  });
+});
+
+test.describe("32. Multiple Windows", () => {
+  test("32.1 Проверка открытия новых вкладок", async ({
+    app,
+    context,
+    page,
+  }) => {
+    const testingPage = app.page32;
+
+    await app.page0.navigate();
+    await app.page0.click("Multiple Windows");
+
+    await expect(testingPage.link).toBeVisible();
+    const tabPromise = context.waitForEvent("page");
+    await testingPage.link.click();
+    const tab = await tabPromise;
+    await tab.waitForLoadState();
+    // await expect(tab.locator("h3")).toHaveText("New Window");
+    await expect(testingPage.textLocator(tab)).toHaveText("New Window");
+    await expect(tab).toHaveURL(`${ENV_BASE_URL}/windows/new`);
+    await tab.close();
+    await expect(page).toHaveURL(`${ENV_BASE_URL}/windows`);
+  });
+});
+
+test.describe("33. Nested Frames", () => {
+  test("33.1 Взаимодействие с вложенными фреймами", async ({ app }) => {
+    const testingPage = app.page33;
+
+    await app.page0.navigate();
+    await app.page0.click("Nested Frames");
+
+    await expect(testingPage.getCurrentFrame("LEFT")).toHaveText(/LEFT/);
+    await expect(testingPage.getCurrentFrame("MIDDLE")).toHaveText(/MIDDLE/);
+    await expect(testingPage.getCurrentFrame("RIGHT")).toHaveText(/RIGHT/);
+    await expect(testingPage.getCurrentFrame("BOTTOM")).toHaveText(/BOTTOM/);
+  });
+});
+
+test.describe("34. Notification Messages", () => {
+  test("34.1 Проверка динамических всплывающих уведомлений", async ({
+    app,
+  }) => {
+    const testingPage = app.page34;
+
+    await app.page0.navigate();
+    await app.page0.click("Notification Messages");
+
+    await expect(testingPage.flash).toBeVisible();
+    const options =
+      /Action (successful|unsuccesful, please try again|unsuccessful)/;
+    for (let i = 0; i < 3; i++) {
+      await testingPage.link.click();
+      await expect(testingPage.flash).toBeVisible();
+      let newText = await testingPage.flash.textContent();
+      expect(newText).toMatch(options);
+    }
+  });
+});
+
+test.describe("35. Redirect Link", () => {
+  const linkItems = [
+    { index: 0, status: 200 },
+    { index: 1, status: 301 },
+    { index: 2, status: 404 },
+    { index: 3, status: 500 },
+  ];
+
+  test.beforeEach(async ({ app, page }) => {
+    const testingPage = app.page35;
+    await app.page0.navigate();
+    await app.page0.click("Redirect Link");
+    const responsePromise = page.waitForResponse((response) =>
+      response.url().includes("/status_codes"),
+    );
+    await testingPage.link.click();
+    const response = await responsePromise;
+    expect(response.status()).toBe(200);
+  });
+
+  for (const item of linkItems) {
+    test(`35.${item.index + 1} Проверка получения статуса ${
+      item.status
+    }`, async ({ app, page }) => {
+      const testingPage = app.page35;
+      const responsePromise = page.waitForResponse((response) =>
+        response.url().includes("/status_codes"),
+      );
+
+      await testingPage.clickCode(item.index);
+      await expect(page).toHaveURL(
+        `${ENV_BASE_URL}/status_codes/${item.status}`,
+      );
+      const response = await responsePromise;
+      expect(response.status()).toBe(item.status);
+    });
+  }
+});
+
+test.describe("36. Secure File Download", () => {
+  // test.use({
+  //   httpCredentials: {
+  //     username: "admin",
+  //     password: "admin",
+  //   },
+  // });
+
+  test.beforeEach(async ({ app }) => {
+    await app.page0.navigate();
+    await app.page0.click("Secure File Download");
+  });
+
+  test("36.1 Проверка защищенного скачивания", async ({ app, page }) => {
+    const testingPage = app.page36;
+    const fileName = "background.jpg";
+    const savePath = join(process.cwd(), "src", "download", fileName);
+
+    page.goto("https://admin:admin@the-internet.herokuapp.com/download_secure");
+
+    await expect(testingPage.title).toHaveText("Secure File Downloader");
+    await expect(testingPage.fileHref(fileName)).toBeVisible();
+
+    const downloadPromise = page.waitForEvent("download");
+    await testingPage.clickFile(fileName);
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toBe(fileName);
+    await download.saveAs(savePath);
+    const fileExists = existsSync(savePath);
+    expect(fileExists).toBe(true);
+    const fileStats = statSync(savePath);
+    expect(fileStats.size).toBeGreaterThan(0);
+  });
+
+  test("36.2 Попытка скачать файл без авторизации", async ({ request }) => {
+    const fileName = "background.jpg";
+    const response = await request.get(
+      `${ENV_BASE_URL}/download_secure/${fileName}`,
+    );
+    expect(response.status()).toBe(401);
+    const text = await response.text();
+    expect(text).toContain("Not authorized");
   });
 });
