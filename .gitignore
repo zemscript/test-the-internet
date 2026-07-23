@@ -14,7 +14,6 @@ dist-ssr
 dev-dist
 # uploads
 test-results
-download
 
 .env
 *.local
