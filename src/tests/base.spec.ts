@@ -910,3 +910,146 @@ test.describe("36. Secure File Download", () => {
     expect(text).toContain("Not authorized");
   });
 });
+
+test.describe("37 Shadow DOM", () => {
+  test("37.1 Взаимодействие с Shadow DOM", async ({ app }) => {
+    const testingPage = app.page37;
+
+    await app.page0.navigate();
+    await app.page0.click("Shadow DOM");
+
+    await expect(testingPage.slot).toBeVisible();
+    await expect(testingPage.slot).toHaveText(
+      "Let's have some different text!",
+    );
+    const li_1 = testingPage.getLi(0);
+    await expect(li_1).toHaveText("Let's have some different text!");
+    const li_2 = testingPage.getLi(1);
+    await expect(li_2).toHaveText("In a list!");
+  });
+});
+
+test.describe("38. Shifting Content", () => {
+  test.beforeEach(async ({ app }) => {
+    await app.page0.navigate();
+    await app.page0.click("Shifting Content");
+  });
+
+  test("38.1 Проверка изменения координат меню", async ({ app, page }) => {
+    const testingPage = app.page38;
+    await testingPage.clickLink(1);
+    const initPosition = await testingPage.menu.boundingBox();
+    await testingPage.clickLink(3);
+    while (true) {
+      await page.reload();
+      const newPosition = await testingPage.menu.boundingBox();
+      if (initPosition!.x !== newPosition!.x) {
+        expect(initPosition!.x).not.toBe(newPosition!.x);
+        break;
+      }
+    }
+  });
+
+  test("38.2 Проверка смещения изображения", async ({ app, page }) => {
+    const testingPage = app.page38;
+    await testingPage.clickLink(2);
+    const initPosition = await testingPage.image.boundingBox();
+    await testingPage.clickLink(1);
+    while (true) {
+      await page.reload();
+      const newPosition = await testingPage.image.boundingBox();
+      if (initPosition!.x !== newPosition!.x) {
+        expect(initPosition!.x).not.toBe(newPosition!.x);
+        break;
+      }
+    }
+  });
+
+  test("38.3 Проверка изменения положения строчки", async ({ app, page }) => {
+    const testingPage = app.page38;
+    await testingPage.clickLink(3);
+    const initList = await testingPage.list.allInnerTexts();
+    while (true) {
+      await page.reload();
+      const newList = await testingPage.list.allInnerTexts();
+      if (JSON.stringify(initList) !== JSON.stringify(newList)) {
+        expect(newList).not.toEqual(initList);
+        break;
+      }
+    }
+  });
+});
+
+test.describe("39. Slow Resources", () => {
+  test("39.1 Ускорение страницы", async ({ app }) => {
+    const testingPage = app.page39;
+    await app.page0.navigate({ waitUntil: "domcontentloaded" });
+    await app.page0.click("Slow Resources");
+
+    await expect(testingPage.title).toBeVisible();
+    await expect(testingPage.title).toHaveText(`Slow Resources`);
+  });
+});
+
+test.describe("40. Sortable Data Tables", () => {
+  test("40.1 Проверка сортируемых таблиц данных", async ({ app }) => {
+    const testingPage = app.page40;
+    const index = 0;
+    await app.page0.navigate();
+    await app.page0.click("Sortable Data Tables");
+
+    await testingPage.clickColumn("Last Name").click();
+    const lastNameAsc = await testingPage.getColumn(index).allInnerTexts();
+    const expectSort = [...lastNameAsc].sort((a, b) => a.localeCompare(b));
+    expect(lastNameAsc).toEqual(expectSort);
+    await testingPage.clickColumn("Last Name").click();
+    const lastNameDesc = await testingPage.getColumn(index).allInnerTexts();
+    const expectSortRev = [...lastNameDesc].reverse();
+    expect(lastNameAsc).toEqual(expectSortRev);
+  });
+
+  test("40.2 Поиск записи в таблице", async ({ app }) => {
+    const testingPage = app.page40;
+    await app.page0.navigate();
+    await app.page0.click("Sortable Data Tables");
+
+    const data = testingPage.getRow("Smith");
+    const dueData = data.locator(".dues");
+    await expect(dueData).toHaveText("$50.00");
+
+    const editLink = data.locator('a[href="#edit"]');
+    await expect(editLink).toBeVisible();
+  });
+});
+
+test.describe("41. Status Codes", () => {
+  test("", async ({ app }) => {
+    await app.page0.navigate();
+    await app.page0.click("Status Codes");
+  });
+});
+
+test.describe("42.Typos", () => {
+  test("42.1 Проверка опечаток", async ({ app, page }) => {
+    const testingPage = app.page42;
+
+    await app.page0.navigate();
+    await app.page0.click("Typos");
+
+    while (true) {
+      const paragraph = await testingPage.text.textContent();
+      if (paragraph && paragraph.includes("won't")) {
+        expect(paragraph).toContain("won't");
+        break;
+      }
+      await page.reload();
+    }
+  });
+});
+
+test.describe("43. WYSIWYG Editor", () => {
+  test("", async ({ app }) => {
+    await app.page0.navigate();
+    await app.page0.click("WYSIWYG Editor");
+  });
+});

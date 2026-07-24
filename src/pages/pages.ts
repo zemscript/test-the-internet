@@ -1,6 +1,10 @@
 import { FrameLocator, Locator, Page, Response } from "@playwright/test";
 import path from "path";
 
+interface NavigateOptions {
+  waitUntil?: "domcontentloaded";
+}
+
 type FramePosition = "LEFT" | "MIDDLE" | "RIGHT" | "BOTTOM";
 type InputDirection = "ArrowUp" | "ArrowDown";
 type ConfirmOptions = "accept" | "dismiss";
@@ -14,8 +18,9 @@ export class Page0 {
     this.title = page.locator("a");
   }
 
-  async navigate() {
-    await this.page.goto("/");
+  async navigate(options?: NavigateOptions) {
+    // async navigate(options: NavigateOptions = {}) {
+    await this.page.goto("/", options);
   }
 
   async click(text: string) {
@@ -341,7 +346,7 @@ export class Page17 {
   }
 
   async loadFile() {
-    const fileName = "test_upload.txt";
+    const fileName = "hello.txt";
     const savePath = path.join(process.cwd(), "src", "download", fileName);
 
     await this.input.setInputFiles(savePath);
@@ -750,5 +755,100 @@ export class Page36 {
 
   async clickFile(name: string) {
     await this.fileHref(name).click();
+  }
+}
+
+export class Page37 {
+  readonly page: Page;
+  readonly slot: Locator;
+  readonly li: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.slot = page.locator('span[slot="my-text"]');
+    this.li = page.locator('ul[slot="my-text"] li');
+  }
+
+  getLi(index: number) {
+    return this.li.nth(index);
+  }
+}
+
+export class Page38 {
+  readonly page: Page;
+  readonly link: Locator;
+  readonly menu: Locator;
+  readonly image: Locator;
+  readonly list: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.link = page.getByRole("link");
+    this.menu = page.locator("ul li a").last();
+    this.image = page.locator("img.shift");
+    this.list = page.locator(".example div.row div.columns");
+  }
+
+  async clickLink(index: number) {
+    await this.link.nth(index).click();
+  }
+}
+
+export class Page39 {
+  readonly page: Page;
+  readonly title: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.title = page.locator("h3");
+  }
+}
+
+export class Page40 {
+  readonly page: Page;
+  readonly lastName: Locator;
+  readonly currentColumn: Locator;
+  readonly currentRow: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+  }
+
+  clickColumn(text: string) {
+    return this.page.locator(`#table1 thead th:has-text("${text}")`);
+  }
+
+  getColumn(index: number) {
+    return this.page.locator(`#table1 tbody tr td:nth-child(${index + 1})`);
+  }
+
+  getRow(text: string) {
+    return this.page.locator(`#table2 tbody tr`).filter({ hasText: text });
+  }
+}
+
+export class Page41 {
+  readonly page: Page;
+
+  constructor(page: Page) {
+    this.page = page;
+  }
+}
+
+export class Page42 {
+  readonly page: Page;
+  readonly text: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.text = page.locator("div.example p").nth(1);
+  }
+}
+
+export class Page43 {
+  readonly page: Page;
+
+  constructor(page: Page) {
+    this.page = page;
   }
 }
